@@ -1,0 +1,28 @@
+gitpod /workspace/workflow (main) $ python sample/example.py
+wf run transition get_flour
+taskmaker : task get_flour created
+new state : need_water
+wf run transition get_water
+taskmaker : task get_water created
+new state : need_salt
+wf run transition get_salt
+taskmaker : task get_salt created
+new state : wait_ingredients
+wf run transition wait
+still waiting task get_flour
+gitpod /workspace/workflow (main) $ python sample/example.py flour
+previous state loaded : wait_ingredients
+wf run transition wait
+still waiting task get_water
+gitpod /workspace/workflow (main) $ python sample/example.py water
+previous state loaded : wait_ingredients
+wf run transition wait
+still waiting task get_salt
+gitpod /workspace/workflow (main) $ python sample/example.py salt
+previous state loaded : wait_ingredients
+wf run transition wait
+new state : cooking
+wf run transition cooking
+new state : finished
+workflow completed
+gitpod /workspace/workflow (main) $

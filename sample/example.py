@@ -3,6 +3,7 @@
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import workflow
+import random
 
 class Task:
     name: str = None
@@ -63,12 +64,15 @@ class Mix(workflow.Transition):
     def __init__(self):
         self.name = "mix"
         self.from_state = MyExampleWorkflow.STATE_MIX
-        self.output_states = [MyExampleWorkflow.STATE_COOK]
+        self.output_states = [MyExampleWorkflow.STATE_COOK, MyExampleWorkflow.STATE_SALT]
         super().__init__()
+
+    def run(self):
+        return self.output_states[random.randrange(0, 1, 1)]
 
 class Cook(workflow.Transition):
     def __init__(self):
-        self.name = "cooking"
+        self.name = "put_in_oven"
         self.from_state = MyExampleWorkflow.STATE_COOK
         self.output_states = [MyExampleWorkflow.STATE_FINISHED]
 
@@ -76,8 +80,7 @@ class WaitIngredients(workflow.Transition):
     def __init__(self):
         self.name = "wait"
         self.from_state = MyExampleWorkflow.STATE_WAIT
-        self.output_states = [self.from_state, MyExampleWorkflow.STATE_COOK]
-
+        self.output_states = [self.from_state, MyExampleWorkflow.STATE_MIX]
     def run(self):
         for task_class in [GetFlour, GetWater, GetSalt]:
             task = Task(task_class.task_name)
@@ -123,10 +126,9 @@ class MyExampleWorkflow(SimplePersistWorkflow):
         self.addTransition(GetFlour())
         self.addTransition(GetSalt())
         self.addTransition(GetWater())
+        self.addTransition(WaitIngredients())
         self.addTransition(Mix())
         self.addTransition(Cook())
-        self.addTransition(WaitIngredients())
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] in ["flour","salt","water"]:
@@ -134,5 +136,8 @@ if __name__ == "__main__":
         task.setDone()
         task.persist()
     wf = MyExampleWorkflow()
+    if len(sys.argv) > 1 and sys.argv[1] in ["uml"]:
+        wf.plantUML()
+        sys.exit(0)
     wf.run()
 
